@@ -45,13 +45,15 @@ let janus;
 let sfutest = null;
 let started = false;
 
-let myusername = Math.floor(Math.random() * 1000);
-let roomId = 1234
+let myusername = 'ZANDUT-React';
+let roomId;
 let myid = null;
 let mystream = null;
 
 let feeds = [];
 var bitrateTimer = [];
+
+var isStudents = false;
 
 Janus.init({debug: "all", callback: function() {
         if(started)
@@ -62,13 +64,15 @@ Janus.init({debug: "all", callback: function() {
 
 class Video extends Component {
 
+    
+
     constructor(props) {
       super(props);
       this.ds = new ListView.DataSource({rowHasChanged: (r1, r2) => true});
       this.state ={ 
         info: 'Initializing',
         status: 'init',
-        roomID: '',
+        roomId: 0,
         isFront: true,
         selfViewSrc: null,
         selfViewSrcKey: null,
@@ -79,8 +83,8 @@ class Video extends Component {
         textRoomValue: '',
         publish: false,
         speaker: false,
-        audioMute: false,
-        videoMute: false,
+        audioMute: isStudents,
+        videoMute: isStudents,
         visible: false
       };
     } 
@@ -101,7 +105,7 @@ class Video extends Component {
                         plugin: "janus.plugin.videoroom",
                         success: (pluginHandle) => {
                           sfutest = pluginHandle;
-                          let register = { "request": "join", "room": roomId, "ptype": "publisher", "display": myusername.toString() };
+                          let register = { "request": "join", "room": this.props.roomId, "ptype": "publisher", "display": myusername.toString() };
                           sfutest.send({"message": register});
                         },
                         error: (error) => {
@@ -195,25 +199,17 @@ class Video extends Component {
       sfutest.changeLocalCamera();
     }
 
-    toggleAudioMute = () => {
-      this.props.App.test()
-      let muted = sfutest.isAudioMuted();
-      if(muted){
-        sfutest.unmuteAudio();
-        this.setState({ audioMute: false });
-      }else{
-        sfutest.muteAudio();
-        this.setState({ audioMute: true });
-      }
-    }
 
-    toggleVideoMute = () => {
-      let muted = sfutest.isVideoMuted();
-      if(muted){
-        this.setState({ videoMute: false });
+    toggleRaiseHand = (on) => {
+      let listener = this.isStudents;
+      this.setState({ videoMute: listener });
+      this.setState({ audioMute: listener });
+
+      if(!listener){
+        sfutest.unmuteAudio();
         sfutest.unmuteVideo();
       }else{
-        this.setState({ videoMute: true });
+        sfutest.muteAudio();
         sfutest.muteVideo();
       }
     }
@@ -230,6 +226,7 @@ class Video extends Component {
 
     endCall = () => {
       janus.destroy()
+      
     }
     
     publishOwnFeed(useAudio){
@@ -317,6 +314,7 @@ class Video extends Component {
 
 
   render() {
+    
     return (
     <ScrollView>
         <View style={styles.container}>
@@ -327,19 +325,7 @@ class Video extends Component {
             }
         </View>
         <View style={{flex: 1, flexDirection: 'row'}}>
-          { this.state.audioMute ? 
-            <Icon
-              raised
-              name='microphone-off'
-              type='material-community'
-              color='grey'
-              onPress={() => this.toggleAudioMute()} /> : 
-            <Icon
-              raised
-              name='microphone'
-              type='material-community'
-              color='black'
-              onPress={() => this.toggleAudioMute()} /> }
+          
 
           { this.state.videoMute ? 
             <Icon
@@ -347,13 +333,13 @@ class Video extends Component {
               name='video-off'
               type='material-community'
               color='grey'
-              onPress={() => this.toggleVideoMute()} /> : 
+              onPress={() => this.toggleRaiseHand() } /> : 
             <Icon
               raised
               name='video'
               type='material-community'
               color='black'
-              onPress={() => this.toggleVideoMute()} /> }
+              onPress={() => this.toggleRaiseHand()} /> }
 
           { this.state.speaker ? 
             <Icon

@@ -1,97 +1,39 @@
+//import liraries
 import React, { Component } from 'react';
-import {
-  AppRegistry,
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  View,
-  TextInput,
-  ListView,
-  ScrollView,
-  Dimensions,
-  Image
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-import { Icon } from 'react-native-elements'
+import IOSIcon from 'react-native-vector-icons/Ionicons';
+import JoinRoom from './joinRoom';
+import ClassRoom from './classroom';
 
-import TabNavigator from 'react-native-tab-navigator';
-import Video from './video';
-import Chat from './chat';
+import { createStackNavigator } from "react-navigation";
 
-import { Provider } from 'react-redux';
-import configureStore from './configureStore'
+const Main = createStackNavigator({
+    JoinRoom: { 
+        screen: JoinRoom,
+        navigationOptions: ({navigation}) => ({
+            title: 'Join Room',
 
+        })
+    }, 
+    ClassRoom: {
+        screen: ClassRoom,
+        navigationOptions: ({navigation}) => ({
+            title: 'Class Room',
 
-console.disableYellowBox = true
-const stores = configureStore()
+            headerLeft: (
+                <View style={{marginLeft : 20}}>
+                    <TouchableOpacity onPress={() => navigation.navigate('JoinRoom')}>
+                        <IOSIcon name='ios-arrow-back' size={30} ></IOSIcon>
+                    </TouchableOpacity>
+                </View>
+                
+            ),
+            
 
-
-
-class Main extends Component{
-
-    constructor(props) {
-        super(props);
-        this.state = {
-			selectedTab: 'video',
-		}
-    }
-
-    onSelectTab(tab) {
-        this.setState({ selectedTab: tab });
-    }
-
-    render() {
-        return (
-        <Provider store={stores}>
-        <View style={styles.container} >
-            <TabNavigator>
-                <TabNavigator.Item
-                    selected={this.state.selectedTab === 'video'}
-                    title="Video"
-                    renderIcon={() => 
-                      <Icon
-                        name='projection-screen'
-                        type='foundation'
-                        iconStyle={{opacity: 0.5}}
-                        color='grey'/> }
-                    renderSelectedIcon={() => 
-                      <Icon
-                        name='projection-screen'
-                         type='foundation'
-                        color='black'/> }
-                    badgeText="1"
-                    onPress={() => this.setState({ selectedTab: 'video' })} >
-                    <Video />
-                </TabNavigator.Item>
-                <TabNavigator.Item
-                    selected={this.state.selectedTab === 'chat'}
-                    title="Chat"
-                    renderIcon={() => 
-                      <Icon
-                        name='chat'
-                        type='entypo'
-                        iconStyle={{opacity: 0.5}}
-                        color='grey'/> }
-                    renderSelectedIcon={() => 
-                      <Icon
-                        name='chat'
-                        type='entypo'
-                        color='black'/> }
-                    renderBadge={() => null}
-                    onPress={() => this.setState({ selectedTab: 'chat' })}>
-                    <Chat />
-                </TabNavigator.Item>
-            </TabNavigator>
-            </View>
-          </Provider>
-        );
-    }
-};
-
-let styles = StyleSheet.create({
-	container: {
-		flex: 1
-	}
+        })
+    },
 });
 
-export default Main
+//make this component available to the app
+export default Main;
