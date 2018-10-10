@@ -53,7 +53,8 @@ let mystream = null;
 let feeds = [];
 var bitrateTimer = [];
 
-var isStudents = false;
+//apakah student atau bukan ? 
+var isStudents = true;
 
 Janus.init({debug: "all", callback: function() {
         if(started)
@@ -80,7 +81,7 @@ class Video extends Component {
         textRoomConnected: false,
         textRoomData: [],
         textRoomValue: '',
-        publish: false,
+        publish: isStudents,
         speaker: false,
         audioMute: isStudents,
         videoMute: isStudents,
@@ -123,7 +124,10 @@ class Video extends Component {
                           if(event != undefined && event != null) {
                               if(event === "joined") {
                                   myid = msg["id"];
+                                  
                                   this.publishOwnFeed(true);
+                                  
+                                  
                                   this.setState({visible: false}); 
                                   if(msg["publishers"] !== undefined && msg["publishers"] !== null) {
                                     var list = msg["publishers"];
@@ -201,21 +205,23 @@ class Video extends Component {
 
 
     toggleRaiseHand = (on) => {
-      var listener = this.state.videoMute;
+      // var listener = this.state.videoMute;
       
 
-      if(!listener){
-        sfutest.muteAudio();
-        sfutest.muteVideo();
-        listener = true;
-      }else{
-        sfutest.unmuteAudio();
-        sfutest.unmuteVideo();
-        listener = false;
-      }
+      // if(!listener){
+      //   sfutest.muteAudio();
+      //   sfutest.muteVideo();
+      //   listener = true;
+      // }else{
+      //   sfutest.unmuteAudio();
+      //   sfutest.unmuteVideo();
+      //   listener = false;
+      // }
 
-      this.setState({ videoMute: listener });
-      this.setState({ audioMute: listener });
+      // this.setState({ videoMute: listener });
+      // this.setState({ audioMute: listener });
+
+      this.publishOwnFeed(true);
     }
 
     toggleSpeaker = () => {
@@ -252,9 +258,9 @@ class Video extends Component {
             }
           });
       }else{
-        // this.setState({ publish: false });
-        // let unpublish = { "request": "unpublish" };
-        // sfutest.send({"message": unpublish});
+        this.setState({ publish: false });
+        let unpublish = { "request": "unpublish" };
+        sfutest.send({"message": unpublish});
       }
     }
 
@@ -331,7 +337,7 @@ class Video extends Component {
         <View style={{flex: 1, flexDirection: 'row'}}>
           
 
-          { this.state.videoMute ? 
+          { this.state.publish ? 
             <Icon
               raised
               name='video-off'
