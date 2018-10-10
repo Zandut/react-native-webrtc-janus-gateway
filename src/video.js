@@ -46,7 +46,7 @@ let sfutest = null;
 let started = false;
 
 let myusername = 'ZANDUT-React';
-let roomId;
+var roomId = 0;
 let myid = null;
 let mystream = null;
 
@@ -64,10 +64,9 @@ Janus.init({debug: "all", callback: function() {
 
 class Video extends Component {
 
-    
-
     constructor(props) {
       super(props);
+      this.roomId = parseInt(this.props.roomId, 10);
       this.ds = new ListView.DataSource({rowHasChanged: (r1, r2) => true});
       this.state ={ 
         info: 'Initializing',
@@ -91,6 +90,7 @@ class Video extends Component {
 
   componentDidMount(){
     InCallManager.start({ media: 'audio' });
+    
     this.janusStart()
   }
 
@@ -105,7 +105,7 @@ class Video extends Component {
                         plugin: "janus.plugin.videoroom",
                         success: (pluginHandle) => {
                           sfutest = pluginHandle;
-                          let register = { "request": "join", "room": this.props.roomId, "ptype": "publisher", "display": myusername.toString() };
+                          let register = { "request": "join", "room": this.roomId, "ptype": "publisher", "display": myusername.toString() };
                           sfutest.send({"message": register});
                         },
                         error: (error) => {
@@ -201,17 +201,21 @@ class Video extends Component {
 
 
     toggleRaiseHand = (on) => {
-      let listener = this.isStudents;
-      this.setState({ videoMute: listener });
-      this.setState({ audioMute: listener });
+      var listener = this.state.videoMute;
+      
 
       if(!listener){
-        sfutest.unmuteAudio();
-        sfutest.unmuteVideo();
-      }else{
         sfutest.muteAudio();
         sfutest.muteVideo();
+        listener = true;
+      }else{
+        sfutest.unmuteAudio();
+        sfutest.unmuteVideo();
+        listener = false;
       }
+
+      this.setState({ videoMute: listener });
+      this.setState({ audioMute: listener });
     }
 
     toggleSpeaker = () => {
@@ -261,7 +265,7 @@ class Video extends Component {
           plugin: "janus.plugin.videoroom",
           success: (pluginHandle) => {
               remoteFeed = pluginHandle;
-              let listen = { "request": "join", "room": roomId, "ptype": "listener", "feed": id };
+              let listen = { "request": "join", "room": this.roomId, "ptype": "listener", "feed": id };
               remoteFeed.send({"message": listen});
           },
           error: (error) => {
@@ -280,7 +284,7 @@ class Video extends Component {
                     jsep: jsep,
                     media: { audioSend: false, videoSend: false },
                     success: (jsep) => {
-                        var body = { "request": "start", "room": roomId };
+                        var body = { "request": "start", "room": this.roomId };
                         remoteFeed.send({"message": body, "jsep": jsep});
                     },
                     error: (error) => {
